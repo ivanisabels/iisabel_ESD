@@ -1,11 +1,6 @@
 #include "client.h"
 
 
-
-namespace udp_client_server
-{
-
-
 // ========================= CLIENT =========================
 
 /** \brief Initialize a UDP client object.
@@ -40,15 +35,16 @@ udp_client::udp_client(const std::string& addr, int port)
     }
 
     //Initialice the accelerometer
-    I2CDevice::init_i2c(1,MPU_ADDR);
-    udp_client::MPU_init( I2CDevice::get_fd() );
+    //I2CDevice::init_i2c(1,MPU_ADDR);
+    //udp_client::MPU_init( I2CDevice::get_fd() );
+    
     //Tenemos que inicializar el Colorimetro
     
     
     //No se si será mejor crear dos clientes, uno para cada sensor
 }
 
-}
+
 
 /** \brief Clean up the UDP client object.
  *
@@ -96,7 +92,7 @@ std::string udp_client::get_addr() const
  * \return -1 if an error occurs, otherwise the number of bytes sent. errno
  * is set accordingly on error.
  */
-int udp_client::send(const void *msg, size_t size)
+int udp_client::send(const char *msg, size_t size)
 {
     int8_t snd = sendto(f_socket, msg, size, 0, f_addrinfo->ai_addr, f_addrinfo->ai_addrlen);
 
@@ -118,22 +114,27 @@ int udp_client::send(const void *msg, size_t size)
  * \return -1 if an error occurs, otherwise the number of bytes receive. errno
  * is set accordingly on error.
  */
-int udp_client::receive(void *buf, size_t size)
+int udp_client::receive(char *buf, size_t size)
 {
-    int8_t recv = recvfrom(f_socket, buf, size, 0, f_addrinfo->ai_addr, f_addrinfo->ai_addrlen);
+    int8_t rec = recv(f_socket, buf, size, 0);
 
     //Check if it has occurred an error
-    if( recv == -1){
+    if( rec == -1){
         udp_client_server_runtime_error("Creation socket failed");
         close(f_socket);
     }
     
-    return recv;
+    return rec;
 }
 
 
 /*-------------- ACELEROMETRO ------------------*/
-void udp_client::MPU_init(int fdI2C) {
+/*void udp_client::MPU_init(int fdI2C) {
+
+
+
+
+
 	
 	printf("CONFIGURACION DEL I2C INICIADA\n");
 	
@@ -213,5 +214,6 @@ void udp_client::MPU_init(int fdI2C) {
 	printf("CONFIGURACION DEL I2C FINALIZADA\n");
 	
 }
+* */
 
 

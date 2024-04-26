@@ -14,8 +14,6 @@
 
 #define	 MPU_ADDR 0x68
 
-namespace udp_client_server
-{
 
 class udp_client_server_runtime_error : public std::runtime_error
 {
@@ -35,7 +33,7 @@ public:
     std::string         get_addr() const;
 
     int                 send(const char *msg, size_t size);
-    int                 receive(void *buf, size_t size);
+    int                 receive(char *buf, size_t size);
     
     void                MPU_init(int fdI2C);
 
@@ -48,4 +46,4 @@ private:
     
 };
 
-}
+
