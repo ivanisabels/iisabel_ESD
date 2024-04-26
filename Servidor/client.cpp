@@ -220,4 +220,46 @@ Color findClosestColor(ColorRGB color){
     return closestColor;
 }
 
+void RGBC_Init(void){
+	
+	//Init the TSC3472 
+	i2c_write( RGBC_ADDRESS,fdI2C, PWR_CONFIG, POWER_ON);
+	
+	//Wait 2.4 ms
+	usleep(24000);
+	
+}
+
+void RGBC_meas(void){
+	
+	uint8_t clear_low, clear_high;
+	uint8_t red_low, red_high;
+	uint8_t green_low, green_high;
+	uint8_t blue_low, blue_high;
+	
+	//Enable the TSC3472 to do a measure
+	i2c_write( RGBC_ADDRESS,fdI2C, PWR_CONFIG , RGBC_MEASURE);
+	
+	//Wait until measure is done
+	usleep(4800);
+	
+	//Read the measure CLEAR
+	i2c_read(RGBC_ADDRESS,fdI2C, CLEAR_L, &clear_low);
+	i2c_read(RGBC_ADDRESS,fdI2C, CLEAR_H, &clear_high);
+
+	
+	//Read the measure RED
+	i2c_read(RGBC_ADDRESS,fdI2C, RED_L, 	&red_low);
+	i2c_read(RGBC_ADDRESS,fdI2C, RED_H, 	&red_high);
+
+	
+	//Read the measure BLUE
+	i2c_read(RGBC_ADDRESS,fdI2C, BLUE_L, &blue_low);
+	i2c_read(RGBC_ADDRESS,fdI2C, BLUE_H, &blue_high);
+
+	
+	//Read the measure GREEN
+	i2c_read(RGBC_ADDRESS,fdI2C, GREEN_L, &green_low); 
+	i2c_read(RGBC_ADDRESS,fdI2C, GREEN_H, &green_high);
+}
 
