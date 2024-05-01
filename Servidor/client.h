@@ -1,6 +1,3 @@
-#ifndef SNAP_UDP_CLIENT_SERVER_H
-#define SNAP_UDP_CLIENT_SERVER_H
-
 #include <sys/socket.h>
 #include <netdb.h> //Struct addrinfo
 #include <stdexcept>
@@ -15,8 +12,8 @@
 #include <thread> //Thread
 #include <cmath> //Pow
 
-namespace udp_client_server
-{
+#define	 MPU_ADDR 0x68
+
 
 class udp_client_server_runtime_error : public std::runtime_error
 {
@@ -36,9 +33,9 @@ public:
     std::string         get_addr() const;
 
     int                 send(const char *msg, size_t size);
-    int                 receive(void *buf, size_t size);
-
-    void                clientThread();
+    int                 receive(char *buf, size_t size);
+    
+    void                MPU_init(int fdI2C);
 
 private:
     int                 f_socket;
@@ -46,29 +43,7 @@ private:
     std::string         f_addr;
     struct addrinfo *   f_addrinfo;
     
-    //Accelerometer
-    float               sensibilityAccelerometer;
-
-    //Colorimeter
-    typedef struct {uint16_t r;uint16_t g;uint16_t b;} ColorRGB;
-    typedef struct { char* nombre; ColorRGB rgb;} Color;
-    Color colors[] = {
-        {"Red", {255, 0, 0}},
-        {"Green", {0, 255, 0}},
-        {"Blue", {0, 0, 255}},
-        {"Yellow", {255, 255, 0}},
-        {"Purple", {128, 0, 128}},
-        {"Cyan", {0, 255, 255}},
-        {"Orange", {255, 165, 0}},
-        {"Brown", {139, 69, 19}},
-        {"White", {255, 255, 255}},
-        {"Black", {0, 0, 0}},
-    };
-
-    int8_t              obtainAccelerationAxis(uint8_t accelerationMSBs, uint8_t accelerationLSBs);
     
-    float               obtainPercentageRGB(uint8_t colorMSBs, uint8_t colorLSBs);
-    float               findClosestColor(ColorRGB color);
 };
 
-}
+

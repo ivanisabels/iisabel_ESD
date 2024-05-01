@@ -1,11 +1,6 @@
 #include "client.h"
 
 
-
-namespace udp_client_server
-{
-
-
 // ========================= CLIENT =========================
 
 /** \brief Initialize a UDP client object.
@@ -32,11 +27,6 @@ udp_client::udp_client(const std::string& addr, int port)
     : f_port(port)
     , f_addr(addr)
 {
-    //Specify the sensibility of the accelerometer
-    sensibilityAccelerometer = 2.0/32767.5;
-
-     // Create a thread for the client
-    std::thread miHilo(&MiClase::clientThread, &objeto);
 
     //Creation socket file descriptor
     if( f_socket = socket(AF_INET, SOCK_DGRAM, 0) < 0){
@@ -44,12 +34,17 @@ udp_client::udp_client(const std::string& addr, int port)
         close(f_socket);
     }
 
-    //Tenemos que inicializar el Acelerometro
+    //Initialice the accelerometer
+    //I2CDevice::init_i2c(1,MPU_ADDR);
+    //udp_client::MPU_init( I2CDevice::get_fd() );
+    
     //Tenemos que inicializar el Colorimetro
+    
+    
     //No se si será mejor crear dos clientes, uno para cada sensor
 }
 
-}
+
 
 /** \brief Clean up the UDP client object.
  *
@@ -97,7 +92,7 @@ std::string udp_client::get_addr() const
  * \return -1 if an error occurs, otherwise the number of bytes sent. errno
  * is set accordingly on error.
  */
-int udp_client::send(const void *msg, size_t size)
+int udp_client::send(const char *msg, size_t size)
 {
     int8_t snd = sendto(f_socket, msg, size, 0, f_addrinfo->ai_addr, f_addrinfo->ai_addrlen);
 
@@ -119,105 +114,106 @@ int udp_client::send(const void *msg, size_t size)
  * \return -1 if an error occurs, otherwise the number of bytes receive. errno
  * is set accordingly on error.
  */
-int udp_client::receive(void *buf, size_t size)
+int udp_client::receive(char *buf, size_t size)
 {
-    int8_t recv = recvfrom(f_socket, buf, size, 0, f_addrinfo->ai_addr, f_addrinfo->ai_addrlen);
+    int8_t rec = recv(f_socket, buf, size, 0);
 
     //Check if it has occurred an error
-    if( recv == -1){
+    if( rec == -1){
         udp_client_server_runtime_error("Creation socket failed");
         close(f_socket);
     }
     
-    return recv;
+    return rec;
 }
 
-/** \brief Thread for the client
- */
-void clientThread(){
-    
-    int8_t status = 0; //
-    ColorRGB color_Server;
-    Color color_Closest;
 
-    //Get the data for the server
-        //Especificar el valor de los datos a recibir y la longitud
-    while( status == 0){
-        status |= receive();
+/*-------------- ACELEROMETRO ------------------*/
+/*void udp_client::MPU_init(int fdI2C) {
 
-        //Calculate the acceleration of each exis
-            //Axis-X
-        obtainAccelerationAxis();
-            //Axis-Y
-        obtainAccelerationAxis();
-            //Axis-Z
-        obtainAccelerationAxis();
 
-        //Calculate the percentage that a color has of each RGB color
-            //Red
-        obtainPercentageRGB();
-            //Green
-        obtainPercentageRGB();
-            //Blue
-        obtainPercentageRGB();
-            //Find the closest color in the color table
-        color_Server = { }
-        color_Closest = findClosestColor();
-    }
+
+
+
+	
+	printf("CONFIGURACION DEL I2C INICIADA\n");
+	
+	// Configuracion Power management 1
+	int device_reset = 0; // [7] Resetea todos los registros internos a su valor por defecto (no funciona si está activado)
+	int sleep = 0;	// [6] Modo de bajo consumo
+	int cycle = 1;	// [5] Cycle between sleep and waking up to take a single sample of data from accel at LP_WAKE_CTRL rate (sleep must be 0)
+	int temp_dis = 1;	// [3] Desactiva el sensor de temperatura Disables temp sensor
+	int clksel = 0; // [2:0] 0 = internal 8MHz oscillator Activamos el oscilador interno de 8 MHz
+	uint8_t pwr_mgmt_1 = (device_reset << 7) | (sleep << 6) | (cycle << 5) | (temp_dis << 3) | (clksel);
+	
+	//Enviamos la configuracion al I2C
+	if ( i2c_write(MPU_ADDR, fdI2C, PWR_MGMT_1, pwr_mgmt_1) == -1) {
+		printf("Error al configurar el I2C: Power Management 1\n");
+		eliminarHilo(0);
+	}
+	printf("Configuracion Power Management 1 Exitosa\n");
+	
+	
+	//Configuracion Power management 2
+	uint8_t lp_wake_ctrl = 3 << 6; // [7:6] Wake-up frequency = 40Hz = 25ms
+	int stby_xa = 0 << 5;	// [5] Modo de Bajo Consumo Eje X Acelerometro
+	int stby_ya = 0 << 4;	// [4] Modo de Bajo Consumo Eje Y Acelerometro
+	int stby_za = 0 << 3;	// [3] Modo de Bajo Consumo Eje Z Acelerometro
+	int stby_xg = 1 << 2;	// [2] Modo de Bajo Consumo Eje X Giroscopio
+	int stby_yg = 1 << 1;	// [1] Modo de Bajo Consumo Eje Y Giroscopio
+	int stby_zg = 1;	// [0] Modo de Bajo Consumo Eje Z Giroscopio
+	uint8_t pwr_mgmt_2 = (lp_wake_ctrl) | (stby_xa) | (stby_ya) | (stby_za) | (stby_xg) | (stby_yg) | (stby_zg);
+	
+	//Enviamos la configuracion al I2C
+	if ( i2c_write(MPU_ADDR, fdI2C, PWR_MGMT_2, pwr_mgmt_2) == -1) {
+		printf("Error al configurar al I2C: Power Management 2\n");
+		eliminarHilo(0);
+	}
+	printf("Configuracion Power Managemente 2 Exitosa\n");
+	
+	
+	//Especificamos la tasa de muestreo
+	uint8_t smplrt_div = 7;	
+		//Enviamos el mensaje
+	if ( i2c_write(MPU_ADDR, fdI2C, SMPRT_DIV, smplrt_div) == -1) {
+		printf("Error al especificar la tasa de muestreo\n");
+		eliminarHilo(0);
+	}
+	printf("Tasa de muestreo establecida correctamente\n");
+	
+	
+	//Establecemos el ancho de banda del filtro digital paso bajo
+	uint8_t dlpf_cfg = 3;	
+		//Enviamos el mensaje
+	if ( i2c_write(MPU_ADDR, fdI2C, CONFIG, dlpf_cfg)  == -1) {
+		printf("Error al establecer el ancho de banda del filtro digital paso bajo\n");
+		eliminarHilo(0);
+	}
+	printf("Establecimiento del ancho de banda del filtro exitosa\n");
+	
+	
+	//Selecciona el rango de escala completo de las salidas del acelerometro
+	uint8_t afs_sel = 0;	
+		//Enviamos el mensaje
+	if ( i2c_write(MPU_ADDR, fdI2C, ACCEL_CONFIG, afs_sel)  == -1) {
+		printf("Error al seleccionar el rango de escala completo de las salidas del acelerometro\n");
+		eliminarHilo(0);
+	}
+	printf("Configuracion del rango de escala completada\n");
+	
+	
+	//Activa la interrupcion del valor leido, la cual ocurre en cada momento que se completa una operacion de escritura (se han escrito los valores que solicitamos leer de un registro)
+	uint8_t data_rdy_en = 1;	
+		//Enviamos el mensaje 
+	if ( i2c_write(MPU_ADDR, fdI2C, INT_ENABLE, data_rdy_en)  == -1) {
+		printf("Error al activar la interrupción del valor leído\n");
+		eliminarHilo(0);
+	}
+	printf("INT_ENABLE OK\n");
+	
+	printf("CONFIGURACION DEL I2C FINALIZADA\n");
+	
 }
-
-/** \brief Calculate the acceleration of an axis in the range [-2, 2] g.
- *
- * \param[in] accelerationMSBs  Most Significant Bits of the measure of the acceleration axis
- * \param[in] accelerationLSBs  Less Significant Bits of the measure of the acceleration axis
- *
- * \return Acceleration Axis in the range [-2, 2] g
- */
-float obtainAccelerationAxis(uint8_t accelerationMSBs, uint8_t accelerationLSBs){
-    int16_t accelerationAxis = (accelerationMSBs << 8) | (accelerationLSBs);
-
-    return accelerationAxis*sensibilityAccelerometer;
-}
-
-/** \brief Calculate the percentage that a color has of each RGB color in the range [0, 255].
- *
- * \param[in] accelerationMSBs  Most Significant Bits of the measure of the color
- * \param[in] accelerationLSBs  Less Significant Bits of the measure of the color
- *
- * \return Percentage of the color in the range [0, 255]
- */
-float obtainPercentageRGB(uint8_t colorMSBs, uint8_t colorLSBs){
-    int16_t color = (colorMSBs << 8) | (colorLSBs);
-
-    return (color*255)/65535;
-}
-
-/** \brief Calculate the closest color of the colors' table that we have create
- *
- * \param[in] color Color which we want to know the closest color.
- *
- * \return Closest color of the colors' table
- */
-Color findClosestColor(ColorRGB color){
-    Color closestColor = colors[0];
-    float distanceMinimum;
-
-    float distance(ColorRGB c1, ColorRGB c2) {
-        return sqrt( pow(c1.r - c2.r, 2) + pow(c1.g - c2.g, 2) + pow(c1.b - c2.b, 2) );
-    }
-    
-
-    distanceMinimum = distance(color, colors[0].rgb);
-
-    for (uint8_t i = 1; i < 10; ++i) {
-        dist = distance(color, colors[i].rgb);
-        if (dist < distanceMinimum) {
-            distanceMinimum = dist;
-            closestColor = colors[i];
-        }
-    }
-
-    return closestColor;
-}
+* */
 
 
