@@ -1,36 +1,33 @@
 #include "i2c.h"
 #include <iostream>	//
 #include <string>
-I2CDevice::I2CDevice(uint8_t devNum, uint8_t devAddr) {
-			this->devNum = devNum;
-			this->devAddr = devAddr;
-		}
-		
-int I2CDevice::init(uint8_t device, uint8_t dev_addr) 
+I2CDevice::I2CDevice(uint8_t deviceNum, uint8_t deviceAddr) 
+	: devNum(deviceNum)
+	,  devAddr(deviceAddr)
 {
+	std::cout << "OPENNING FILE DESCRIPTOR FOR THE INTERFACE: " << devNum << ", ADDRESS SENSOR: " << devAddr << std::endl;
+	
 	//String with the file descriptor path
-	std::string i2cFile= "/dev/i2c-" + std::to_string(device);
+	std::string i2cFile= "/dev/i2c-" + std::to_string(devNum);
 	
 	//Open the file descriptor
-	
 	fd = open(i2cFile.c_str(), O_RDWR);
 	
 	if (fd < 0) {
 		std::cout << "Error: can't open the file " << i2cFile << std::endl;
-		return -1;
 	}
 	
-	std::cout << "File " << i2cFile << " opened succesfully" << std::endl;
 	
 	// Configure the file fot I2C communications with slave at the specified address
-	if (ioctl(fd, I2C_SLAVE, dev_addr) < 0) {
+	if (ioctl(fd, I2C_SLAVE, devAddr) < 0) {
 		std::cout << "ioctl error" << std::endl;
 		close(fd);
-		return -1;
 	}
-	std::cout << "File " << i2cFile << " configured succesfully" << std::endl;
-	return fd;
+	
+	std::cout << "	CORRECT"<< std::endl << std::endl;
+		
 }
+
 
 int I2CDevice::write(uint8_t dev_addr, uint8_t reg_addr, uint8_t value) 
 {
@@ -55,13 +52,13 @@ int I2CDevice::write(uint8_t dev_addr, uint8_t reg_addr, uint8_t value)
 	//Enviamos el paquete
 	if (ioctl(fd, I2C_RDWR, &packets) < 0) {
 		std::cout << "ioctl error" << std::endl;
-		return 0;	// Error
+		return -1;	// Error
 	}
 	
 	return 1;
 }
 
-int I2CDevice::read(uint8_t addr, int fdI2C, uint8_t reg_addr, uint8_t *value)
+int I2CDevice::read(uint8_t addr, uint8_t reg_addr, uint8_t *value)
 {
 	
 	struct i2c_rdwr_ioctl_data packets; //
@@ -85,8 +82,8 @@ int I2CDevice::read(uint8_t addr, int fdI2C, uint8_t reg_addr, uint8_t *value)
 	packets.nmsgs = READ_MSG_SIZE; //Numero de mensajes que contiene el paquete
 	
 	// Enviamos el paquete
-	if (ioctl(fdI2C, I2C_RDWR, &packets) < 0) {
-		return 0;	// Error
+	if (ioctl(fd, I2C_RDWR, &packets) < 0) {
+		return -1;	// Error
 	}
 	
 	
@@ -97,7 +94,7 @@ int I2CDevice::closeFD (void)
 {
 	if(close(fd)) {
 		std::cout << "close error" << std::endl;
-		return 0;
+		return -1;
 	}
 	return 1;
 }
