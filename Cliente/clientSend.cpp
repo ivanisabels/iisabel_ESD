@@ -41,17 +41,12 @@ udp_clientSend::udp_clientSend(const std::string& addr, int port)
     {
         throw udp_client_server_runtime_error(("invalid address or port: \"" + addr + ":" + decimal_port + "\"").c_str());
     }
+    
     f_socket = socket(f_addrinfo->ai_family, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP);
     if(f_socket == -1)
     {
         freeaddrinfo(f_addrinfo);
         throw udp_client_server_runtime_error(("could not create socket for: \"" + addr + ":" + decimal_port + "\"").c_str());
-    }
-
-    //Creation socket file descriptor
-    if( f_socket = socket(AF_INET, SOCK_DGRAM, 0) < 0){
-        udp_client_server_runtime_error("Creation socket failed");
-        close(f_socket);
     }
     
     

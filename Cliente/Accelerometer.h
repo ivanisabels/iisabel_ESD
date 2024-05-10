@@ -27,6 +27,6 @@
 				Accelerometer(void);
 				virtual ~Accelerometer() {}	//Virtual destructor
 				
-				void	Accelerometer_measure(int16_t *measures);
+				void	Accelerometer_measure(char *measures);
 		};
 #endif

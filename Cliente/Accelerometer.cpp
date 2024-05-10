@@ -65,11 +65,16 @@ Accelerometer::Accelerometer(void)
 	
 	std::cout << "	CORRECT" << std::endl << std::endl;
 	
+	i2c.closeFD();
+	
 }
 
-void Accelerometer::Accelerometer_measure( int16_t *measures){
+void Accelerometer::Accelerometer_measure( char *measures){
 	uint8_t registrosAcelerometro[] = {ACCEL_XOUT_H_REG, ACCEL_XOUT_L_REG, ACCEL_YOUT_H_REG, ACCEL_YOUT_L_REG, ACCEL_ZOUT_H_REG, ACCEL_ZOUT_L_REG};
 	uint8_t readingAccelerometerRegisters[6];
+	
+	//Open file descriptor
+	i2c.openFD();
 	
 	//Read the accelerometer records
 	for(int n=0; n<6; n++){
@@ -77,13 +82,11 @@ void Accelerometer::Accelerometer_measure( int16_t *measures){
 			std::cout << "Error Reading Measures Accelerometer" << std::endl;
 		}
 	}
+	
+	for(int n=0; n<6; n++){
+		measures[n] = readingAccelerometerRegisters[n];
+	}
+	
+	i2c.closeFD();
 
-	//Obtain the acceleration of the X axis
-	measures[0] = (readingAccelerometerRegisters[0] << 8) | (readingAccelerometerRegisters[1]);
-
-	//Obtain the acceleration of the Y axis
-	measures[1] = (readingAccelerometerRegisters[2] << 8) | (readingAccelerometerRegisters[3]);
-
-	//Obtain the acceleration of the Z axis
-	measures[2] = (readingAccelerometerRegisters[4] << 8) | (readingAccelerometerRegisters[5]);
 }

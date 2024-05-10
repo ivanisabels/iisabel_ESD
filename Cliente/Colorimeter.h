@@ -3,6 +3,7 @@
 		
 		#include "clientSend.h"
 		#include "clientReceive.h"
+		#include "i2c.h"
 
 		/*-------------- ADDRESS ------------------*/ 
 		#define COLORIMETER_ADDRESS uint8_t(0x29)
@@ -30,6 +31,6 @@
 				Colorimeter(void);
 				virtual ~Colorimeter() {}	//Virtual destructor
 				
-				void	Colorimeter_measure(uint16_t *measures);
+				void	Colorimeter_measure(char *measures);
 		};
 #endif

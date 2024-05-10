@@ -7,6 +7,7 @@
 		#include <signal.h>
 		#include <unistd.h> //usleep, close
 		#include <cstdint> //uint_t
+		#include <string>
 
 		#define  SEND_MSG_SIZE 1	// Numero mensajes a enviar a MPU
 		#define  READ_MSG_SIZE 2	// Número mensajes a leer de MPU
@@ -19,19 +20,23 @@
 		class I2CDevice {
 			private:
 				int fd;
-				uint8_t devNum;
+				std::string devNum;
 				uint8_t devAddr;
 			public:
-				I2CDevice(uint8_t devNum, uint8_t devAddr);
+				I2CDevice(std::string devNum, uint8_t devAddr);
 				virtual ~I2CDevice() {}	//Virtual destructor
 				
 				int		get_fd() const;
-				int		get_devNum() const;
+				std::string		get_devNum() const;
 				int		get_devAddr() const;
+				
+				int		set_fd();
 				
 				int 	init(uint8_t device, uint8_t dev_addr) ;
 				int 	write(uint8_t dev_addr, uint8_t reg_addr, uint8_t value) ;
 				int 	read(uint8_t addr, uint8_t reg_addr, uint8_t *value) ;
 				int 	closeFD (void) ;
+				int     openFD (void);
+
 		};
 #endif

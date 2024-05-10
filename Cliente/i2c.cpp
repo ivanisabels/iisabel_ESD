@@ -1,14 +1,14 @@
 #include "i2c.h"
 #include <iostream>	//
 #include <string>
-I2CDevice::I2CDevice(uint8_t deviceNum, uint8_t deviceAddr) 
+I2CDevice::I2CDevice(std::string deviceNum, uint8_t deviceAddr) 
 	: devNum(deviceNum)
 	,  devAddr(deviceAddr)
 {
 	std::cout << "OPENNING FILE DESCRIPTOR FOR THE INTERFACE: " << devNum << ", ADDRESS SENSOR: " << devAddr << std::endl;
 	
 	//String with the file descriptor path
-	std::string i2cFile= "/dev/i2c-" + std::to_string(devNum);
+	std::string i2cFile= "/dev/i2c-" + devNum;
 	
 	//Open the file descriptor
 	fd = open(i2cFile.c_str(), O_RDWR);
@@ -16,6 +16,8 @@ I2CDevice::I2CDevice(uint8_t deviceNum, uint8_t deviceAddr)
 	if (fd < 0) {
 		std::cout << "Error: can't open the file " << i2cFile << std::endl;
 	}
+	
+	std::cout << "devNum: " + devNum << std::endl;
 	
 	
 	// Configure the file fot I2C communications with slave at the specified address
@@ -96,7 +98,45 @@ int I2CDevice::closeFD (void)
 		std::cout << "close error" << std::endl;
 		return -1;
 	}
+	
+	std::cout << "devNum: " + devNum << std::endl;
+	
 	return 1;
+}
+
+int I2CDevice::openFD (void)
+{
+	
+	//String with the file descriptor path
+	std::string i2cFile= "/dev/i2c-" + devNum;
+	
+	//Open the file descriptor
+	fd = open(i2cFile.c_str(), O_RDWR);
+	
+	
+	std::cout << "devNum: " + devNum << std::endl;
+	
+	
+	if (fd < 0) {
+		std::cout << "Error: can't open the file " << i2cFile << std::endl;
+		return -1;
+	}
+	
+	
+	return 0;
+}
+
+int	I2CDevice::get_fd() const{
+	return fd;
+}
+
+std::string	I2CDevice::get_devNum() const{
+	return devNum;
+	
+}
+	
+int	I2CDevice::get_devAddr() const{
+	return devAddr;
 }
 
 
