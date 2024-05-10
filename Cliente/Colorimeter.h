@@ -1,7 +1,8 @@
 #ifndef COLORIMETER_H
 	#define COLORIMETER_H
-	
-		#include "client.h"
+		
+		#include "clientSend.h"
+		#include "clientReceive.h"
 
 		/*-------------- ADDRESS ------------------*/ 
 		#define COLORIMETER_ADDRESS uint8_t(0x29)

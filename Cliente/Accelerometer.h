@@ -1,7 +1,8 @@
 #ifndef ACCELEROMETER_H
 	#define ACCELEROMETER_H
 
-		#include "client.h"
+		#include "clientSend.h"
+		#include "clientReceive.h"
 
 		/*-------------- ADDRESS ------------------*/
 		#define	 ACCELEROMETER_ADDR uint8_t(0x68)
