@@ -1,10 +1,44 @@
-//#include "Accelerometer.h"
+#include "Accelerometer.h"
 #include "Colorimeter.h"
 #include <iostream>
 #include <cstring>
+#include "signal.h"
+#include <functional>
+
+
+//Create Accelerometer
+static Accelerometer accele;
+//Create Colorimeter
+static Colorimeter color;
+uint8_t final = 1;
+
+static void closeClient(int sig){
+    accele.getI2C().closeFD();
+    color.getI2C().closeFD();
+    
+    final = 0;
+}
+
+static void controlProgramBreak(){
+ struct sigaction sa;
+ 
+ sa.sa_handler = closeClient;
+ 
+ sigemptyset(&sa.sa_mask);
+ 
+ sa.sa_flags = 0;
+ 
+ sigaction(SIGINT, &sa, NULL);
+ sigaction(SIGTSTP, &sa, NULL);
+    
+}
 
 
 int main() {
+    
+    controlProgramBreak();
+    
+    
     // Server details
     std::string server_address = "192.168.1.168";
     int server_port = 5000;
@@ -12,7 +46,8 @@ int main() {
     udp_clientSend clientSend(server_address, server_port);
     
     // Client details
-    std::string client_address = "192.168.1.228";
+    //std::string client_address = "192.168.1.228";
+    std::string client_address = "192.168.1.153";
     int client_port = 5000;
     // Create UDP client send
     clientReceive clientRec(client_address, client_port);
@@ -28,52 +63,54 @@ int main() {
     //clientRec.Receive( buffer , sizeof(buffer) ); 
     //std::cout << buffer << std::endl;
     
-    
-    //Create Accelerometer
-    //Accelerometer accele;
-    
-    //Create Colorimeter
-    Colorimeter color;
-    
     sleep(3);
     
     //Counter
-    uint8_t cnt = 0;
+    uint8_t contadorMedidas = 0;
     
     //Measures
     char measures[140];
     
-    while(1){
+    while(final){
             
         std::cout<<"Prueba entra"<<std::endl;
             
         //Wait 1 second in order to do the measures
-        sleep(1);
+        //sleep(1);
+        usleep(500000);
         
         //Clear the window
         //std::system("clear");
         
         //Reading the accelerometer's measures
-        //accele.Accelerometer_measure( &measures[cnt*14] );
+        accele.Accelerometer_measure( &measures[contadorMedidas*14] );
+        std::cout << static_cast<int>(contadorMedidas*14) << std::endl;
         
-        usleep(50000);
+        //measures[contadorMedidas*14] = 0; measures[contadorMedidas*14+1] = 0; measures[contadorMedidas*14+2] = 0; measures[contadorMedidas*14+3] = 0;
+        //measures[contadorMedidas*14+4] = 0; measures[contadorMedidas*14+5] = 0; measures[contadorMedidas*14+6] = 0; measures[contadorMedidas*14+7] = 0;
+        
+        usleep(500000);
         
         //Reading the colorimeter's measures
-        color.Colorimeter_measure( &measures[cnt*14 + 6] );
+        color.Colorimeter_measure( &measures[contadorMedidas*14 + 6] );
+        std::cout << static_cast<int>(contadorMedidas*14+6) << std::endl;
+        
+        //measures[contadorMedidas*14+6] = 0; measures[contadorMedidas*14+7] = 0; measures[contadorMedidas*14+8] = 0; measures[contadorMedidas*14+9] = 0;
+        //measures[contadorMedidas*14+10] = 0; measures[contadorMedidas*14+11] = 0; measures[contadorMedidas*14+12] = 0; measures[contadorMedidas*14+13] = 0;
         
         //Reading the sensors' measures
         for(uint8_t i = 0; i < 14; i++){
-            std::cout << static_cast<uint8_t>(measures[cnt*14 + i]);
+            std::cout << static_cast<int>(measures[contadorMedidas*14 + i]) ;
         }
-        std::cout << std::endl<< std::endl;
+        std::cout << std::endl << static_cast<int>(contadorMedidas) << std::endl<< std::endl;
         
         //Increment the counter
-        cnt++;
+        contadorMedidas++;
         
         // Send message from client to server
-        if( cnt == 10 ){
+        if( contadorMedidas == 10 ){
             
-            cnt = 0;
+            contadorMedidas = 0;
             
                         
             // Size of message to send
@@ -88,6 +125,8 @@ int main() {
             
         }
     }
+    
+   
 
     return 0;
 }

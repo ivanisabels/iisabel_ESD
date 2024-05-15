@@ -1,7 +1,7 @@
 #include "Accelerometer.h"
 
 Accelerometer::Accelerometer(void)
-    : i2c(1, ACCELEROMETER_ADDR) //Initialice the I2C interface
+    : i2c("1", ACCELEROMETER_ADDR) //Initialice the I2C interface
 {
 	std::cout << "INTIALIZACION CONFIGURATION ACCELEROMETER" << std::endl;
 	
@@ -89,4 +89,8 @@ void Accelerometer::Accelerometer_measure( char *measures){
 	
 	i2c.closeFD();
 
+}
+
+I2CDevice Accelerometer::getI2C(){
+	return i2c;
 }

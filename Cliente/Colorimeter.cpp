@@ -62,3 +62,7 @@ void Colorimeter::Colorimeter_measure(char *measures){
 	
 	i2c.closeFD();
 }
+
+I2CDevice Colorimeter::getI2C(){
+	return i2c;
+}

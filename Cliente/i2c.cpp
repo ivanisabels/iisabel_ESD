@@ -5,7 +5,7 @@ I2CDevice::I2CDevice(std::string deviceNum, uint8_t deviceAddr)
 	: devNum(deviceNum)
 	,  devAddr(deviceAddr)
 {
-	std::cout << "OPENNING FILE DESCRIPTOR FOR THE INTERFACE: " << devNum << ", ADDRESS SENSOR: " << devAddr << std::endl;
+	std::cout << "OPENNING FILE DESCRIPTOR FOR THE INTERFACE: " << devNum << ", ADDRESS SENSOR: " << static_cast<int>(devAddr) << std::endl;
 	
 	//String with the file descriptor path
 	std::string i2cFile= "/dev/i2c-" + devNum;

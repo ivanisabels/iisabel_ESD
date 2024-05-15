@@ -31,6 +31,8 @@
 				Colorimeter(void);
 				virtual ~Colorimeter() {}	//Virtual destructor
 				
+				I2CDevice getI2C();
+				
 				void	Colorimeter_measure(char *measures);
 		};
 #endif

@@ -27,6 +27,8 @@
 				Accelerometer(void);
 				virtual ~Accelerometer() {}	//Virtual destructor
 				
+				I2CDevice getI2C();
+				
 				void	Accelerometer_measure(char *measures);
 		};
 #endif
