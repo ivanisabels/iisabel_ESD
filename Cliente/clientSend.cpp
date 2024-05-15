@@ -65,6 +65,15 @@ udp_clientSend::~udp_clientSend()
     close(f_socket);
 }
 
+int udp_clientSend::CloseClientSendSocket(void) {
+	if (0 == close(f_socket)) {
+		std::cout << "Server socket closed successfully" << std::endl;
+		return 1;
+	}
+	std::cout << "Error! Couldn't close server's socket" << std::endl;
+	return 0;
+}
+
 /** \brief Retrieve a copy of the socket identifier.
  *
  * \return The socket used by this UDP client.

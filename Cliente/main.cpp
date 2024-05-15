@@ -4,18 +4,33 @@
 #include <cstring>
 #include "signal.h"
 #include <functional>
+#include <unistd.h>
 
+#define SERVER_ADDRESS 	"192.168.1.24"
+#define SERVER_PORT		5000
+#define CLIENT_ADDRESS	"192.168.1.148"
+#define CLIENT_PORT		5000
 
+#define OK 	"OK"
+#define NOK "Wrong Message"
+#define CLIENT_GREET	"Hello Server"
+#define SERVER_GREET	"Hello RPI"
+
+void InitialGreet(void);
+/*
 //Create Accelerometer
 static Accelerometer accele;
 //Create Colorimeter
 static Colorimeter color;
+*/
 uint8_t final = 1;
 
 static void closeClient(int sig){
+	/*
     accele.getI2C().closeFD();
     color.getI2C().closeFD();
-    
+    */
+
     final = 0;
 }
 
@@ -36,9 +51,9 @@ static void controlProgramBreak(){
 
 int main() {
     
-    controlProgramBreak();
-    
-    
+    //controlProgramBreak();
+/*
+
     // Server details
     std::string server_address = "192.168.1.168";
     int server_port = 5000;
@@ -62,7 +77,7 @@ int main() {
     //char buffer[1024];
     //clientRec.Receive( buffer , sizeof(buffer) ); 
     //std::cout << buffer << std::endl;
-    
+
     sleep(3);
     
     //Counter
@@ -71,7 +86,7 @@ int main() {
     //Measures
     char measures[140];
     
-    while(final){
+    /*while(final){
             
         std::cout<<"Prueba entra"<<std::endl;
             
@@ -125,10 +140,46 @@ int main() {
             
         }
     }
-    
-   
+*/
+
+	InitialGreet();
 
     return 0;
+}
+
+void InitialGreet(void) {
+	// Server details
+	std::string server_address = SERVER_ADDRESS;
+	int server_port = SERVER_PORT;
+	//Create UDP client send
+	udp_clientSend clientSend(server_address, server_port);
+
+	// Client details
+	std::string client_address = CLIENT_ADDRESS;
+	int client_port = CLIENT_PORT;
+	// Create UDP client send
+	clientReceive clientRec(client_address, client_port);
+
+	////Send Hello Server to the server
+	char message[13] = CLIENT_GREET;
+	std::string expectedAns = SERVER_GREET;
+	clientSend.send(message, sizeof(message));
+
+	std::cout << "Message sent, waiting for: \"" << expectedAns << "\"" << std::endl;
+
+	//Receive Hello Client from the server
+	char buffer[1024];
+	clientRec.Receive(buffer , sizeof(buffer) );
+	std::cout << "Message received: " << std::string(buffer) << std::endl;
+
+	if (std::string(buffer) == expectedAns) {
+		std::cout << "Success! Closing socket" << std::endl;
+		clientSend.CloseClientSendSocket();
+
+
+	}
+
+	usleep(50000);
 }
 
 

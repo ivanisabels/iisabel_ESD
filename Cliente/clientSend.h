@@ -28,6 +28,7 @@
             udp_clientSend(const std::string& addr, int port);
             ~udp_clientSend();
             
+            int					CloseClientSendSocket(void);
             int                 get_socket() const;
             int                 get_port() const;
             std::string         get_addr() const;
