@@ -6,9 +6,9 @@
 #include <functional>
 #include <unistd.h>
 
-#define SERVER_ADDRESS 	"192.168.1.24"
+#define SERVER_ADDRESS 	"192.168.1.168"
 #define SERVER_PORT		5000
-#define CLIENT_ADDRESS	"192.168.1.148"
+#define CLIENT_ADDRESS	"192.168.1.108"
 #define CLIENT_PORT		5000
 
 #define OK 	"OK"
@@ -17,19 +17,19 @@
 #define SERVER_GREET	"Hello RPI"
 
 void InitialGreet(void);
-/*
+
 //Create Accelerometer
 static Accelerometer accele;
 //Create Colorimeter
 static Colorimeter color;
-*/
+
 uint8_t final = 1;
 
 static void closeClient(int sig){
-	/*
+
     accele.getI2C().closeFD();
     color.getI2C().closeFD();
-    */
+
 
     final = 0;
 }
@@ -51,32 +51,20 @@ static void controlProgramBreak(){
 
 int main() {
     
-    //controlProgramBreak();
-/*
+    controlProgramBreak();
+    InitialGreet();
 
     // Server details
-    std::string server_address = "192.168.1.168";
-    int server_port = 5000;
+    std::string server_address = SERVER_ADDRESS;
+    int server_port = SERVER_PORT;
     // Create UDP client send
     udp_clientSend clientSend(server_address, server_port);
     
     // Client details
-    //std::string client_address = "192.168.1.228";
-    std::string client_address = "192.168.1.153";
-    int client_port = 5000;
+    std::string client_address = CLIENT_ADDRESS;
+    int client_port = CLIENT_PORT;
     // Create UDP client send
     clientReceive clientRec(client_address, client_port);
-    
-    ////Send Hello Server to the server
-    //char message[13] = "Hello Server";
-    //clientSend.send( message, sizeof(message));
-    
-    //std::cout << "Message send, waiting for: Ok" << std::endl;
-    
-    ////Receive Hello Client for the server
-    //char buffer[1024];
-    //clientRec.Receive( buffer , sizeof(buffer) ); 
-    //std::cout << buffer << std::endl;
 
     sleep(3);
     
@@ -86,7 +74,7 @@ int main() {
     //Measures
     char measures[140];
     
-    /*while(final){
+    while(final){
             
         std::cout<<"Prueba entra"<<std::endl;
             
@@ -101,17 +89,11 @@ int main() {
         accele.Accelerometer_measure( &measures[contadorMedidas*14] );
         std::cout << static_cast<int>(contadorMedidas*14) << std::endl;
         
-        //measures[contadorMedidas*14] = 0; measures[contadorMedidas*14+1] = 0; measures[contadorMedidas*14+2] = 0; measures[contadorMedidas*14+3] = 0;
-        //measures[contadorMedidas*14+4] = 0; measures[contadorMedidas*14+5] = 0; measures[contadorMedidas*14+6] = 0; measures[contadorMedidas*14+7] = 0;
-        
         usleep(500000);
         
         //Reading the colorimeter's measures
         color.Colorimeter_measure( &measures[contadorMedidas*14 + 6] );
         std::cout << static_cast<int>(contadorMedidas*14+6) << std::endl;
-        
-        //measures[contadorMedidas*14+6] = 0; measures[contadorMedidas*14+7] = 0; measures[contadorMedidas*14+8] = 0; measures[contadorMedidas*14+9] = 0;
-        //measures[contadorMedidas*14+10] = 0; measures[contadorMedidas*14+11] = 0; measures[contadorMedidas*14+12] = 0; measures[contadorMedidas*14+13] = 0;
         
         //Reading the sensors' measures
         for(uint8_t i = 0; i < 14; i++){
@@ -129,20 +111,20 @@ int main() {
             
                         
             // Size of message to send
-            //size_t message_size = std::strlen(measures_Char);
+            size_t message_size = std::strlen(measures);
             
-            //int bytes_sent = client.send(measures_Char, message_size);
-            //if (bytes_sent < 0) {
-                //std::cerr << "Error sending message from client to server" << std::endl;
-                //return 1;
-            //}
+            int bytes_sent = clientSend.send(measures, message_size);
+            if (bytes_sent < 0) {
+                std::cerr << "Error sending message from client to server" << std::endl;
+                return 1;
+            }
             
             
         }
     }
-*/
 
-	InitialGreet();
+
+
 
     return 0;
 }
