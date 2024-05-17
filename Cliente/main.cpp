@@ -5,10 +5,13 @@
 #include "signal.h"
 #include <functional>
 #include <unistd.h>
-
-#define SERVER_ADDRESS 	"192.168.1.168"
+// RPI
+//#define SERVER_ADDRESS 	"192.168.1.168"
+//#define CLIENT_ADDRESS	"192.168.1.108"
+//Home
+#define SERVER_ADDRESS 	"192.168.1.24"
+#define CLIENT_ADDRESS	"192.168.1.148"
 #define SERVER_PORT		5000
-#define CLIENT_ADDRESS	"192.168.1.108"
 #define CLIENT_PORT		5000
 
 #define OK 	"OK"
@@ -73,10 +76,11 @@ int main() {
     
     //Measures
     char measures[140];
+    char buffer[1024];
     
     while(final){
             
-        std::cout<<"Prueba entra"<<std::endl;
+        std::cout<<"Measuring:"<<std::endl;
             
         //Wait 1 second in order to do the measures
         //sleep(1);
@@ -87,13 +91,11 @@ int main() {
         
         //Reading the accelerometer's measures
         accele.Accelerometer_measure( &measures[contadorMedidas*14] );
-        std::cout << static_cast<int>(contadorMedidas*14) << std::endl;
         
         usleep(500000);
         
         //Reading the colorimeter's measures
         color.Colorimeter_measure( &measures[contadorMedidas*14 + 6] );
-        std::cout << static_cast<int>(contadorMedidas*14+6) << std::endl;
         
         //Reading the sensors' measures
         for(uint8_t i = 0; i < 14; i++){
@@ -112,14 +114,17 @@ int main() {
                         
             // Size of message to send
             size_t message_size = std::strlen(measures);
-            
-            int bytes_sent = clientSend.send(measures, message_size);
-            if (bytes_sent < 0) {
-                std::cerr << "Error sending message from client to server" << std::endl;
-                return 1;
-            }
-            
-            
+            do {
+				int bytes_sent = clientSend.send(measures, message_size);
+				if (bytes_sent < 0) {
+					std::cerr << "Error sending message from client to server" << std::endl;
+					break;
+				}
+				std::cout << "Message sent. Waiting for ack" << std::endl;
+				clientRec.Receive(buffer , sizeof(buffer) );
+				std::cout << "Message received: " << std::string(buffer) << std::endl;
+				usleep(10000);
+            } while (std::string(buffer) != OK);
         }
     }
 

@@ -17,8 +17,6 @@ I2CDevice::I2CDevice(std::string deviceNum, uint8_t deviceAddr)
 		std::cout << "Error: can't open the file " << i2cFile << std::endl;
 	}
 	
-	std::cout << "devNum: " + devNum << std::endl;
-	
 	
 	// Configure the file fot I2C communications with slave at the specified address
 	if (ioctl(fd, I2C_SLAVE, devAddr) < 0) {
@@ -99,8 +97,6 @@ int I2CDevice::closeFD (void)
 		return -1;
 	}
 	
-	std::cout << "devNum: " + devNum << std::endl;
-	
 	return 1;
 }
 
@@ -112,10 +108,6 @@ int I2CDevice::openFD (void)
 	
 	//Open the file descriptor
 	fd = open(i2cFile.c_str(), O_RDWR);
-	
-	
-	std::cout << "devNum: " + devNum << std::endl;
-	
 	
 	if (fd < 0) {
 		std::cout << "Error: can't open the file " << i2cFile << std::endl;

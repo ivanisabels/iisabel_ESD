@@ -82,13 +82,10 @@ void Accelerometer::Accelerometer_measure( char *measures){
 			std::cout << "Error Reading Measures Accelerometer" << std::endl;
 		}
 	}
-	std::cout<<"Medidas acelerometro: ";
 	
 	for(int n=0; n<6; n++){
 		measures[n] = readingAccelerometerRegisters[n];
-		std::cout<< static_cast<int>(measures[n]) + " ";
 	}
-	std::cout<<std::endl;
 	
 	i2c.closeFD();
 
